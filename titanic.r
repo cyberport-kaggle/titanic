@@ -74,16 +74,45 @@ code_embarkation <- function(df){
 # Modeling
 ########
 
-naive_linear <- function(df){
-    # naive linear model using:
-    # pclass, sex, age, sibsp, parch, fare, embarked
+glm_binomial <- function(df){
+    # simple linear model
+    # Can't use age, since not all of them have age.
+    # Removed a few factors for nonsignificance.
     fm <- as.formula('survived ~ pclass + sibsp + embarked + sex')
     mdl <- glm(fm, data=df, family='binomial')
     return(mdl)
 }
 
-train_df <- code_gender(code_embarkation(train))
-test_df <- code_gender(code_embarkation(test))
-linear_mdl <- naive_linear(train_df)
-linear_predict <- predict(linear_mdl, test_df)
+if (FALSE) {
+    # Skip this, already run
+    train_df <- code_gender(code_embarkation(train))
+    test_df <- code_gender(code_embarkation(test))
+    linear_mdl <- glm_binomial(train_df)
+    linear_predict <- predict(linear_mdl, test_df, type='response')
+    linear_predict[linear_predict < 0.5] <- 0
+    linear_predict[linear_predict > 0.5] <- 1
+    out <- data.frame(PassengerId=test_df$passengerid, Survived=linear_predict)
+    write.csv(out, file="prediction.csv", row.names=FALSE)
+}
+library(randomForest)
+rforest <- function(df) {
+    # Random Forests model
+    # Manually select the ones that are fully populated
+    fm <- as.formula('survived ~ pclass + sex + sibsp + parch + embarked + fare')
+    # Requires response var to be categorical
+    if (class(df$survived) != 'factor') {
+        df$survived <- as.factor(df$survived)
+    }
+    mdl <- randomForest(fm, data=df)
+    return(mdl)
+}
+
+if (TRUE) {
+    train_df <- code_gender(code_embarkation(train))
+    test_df <- code_gender(code_embarkation(test))
+    rf_mdl <- rforest(train_df)
+    rf_predict <- predict(rf_mdl, test_df)
+    out <- data.frame(PassengerId=test_df$passengerid, Survived=rf_predict)
+    write.csv(out, file="prediction.csv", row.names=FALSE)
+}
 
