@@ -98,7 +98,7 @@ library(randomForest)
 rforest <- function(df) {
     # Random Forests model
     # Manually select the ones that are fully populated
-    fm <- as.formula('survived ~ pclass + sex + sibsp + parch + embarked + fare')
+    fm <- as.formula('survived ~ pclass + sex + sibsp + parch + embarked')
     # Requires response var to be categorical
     if (class(df$survived) != 'factor') {
         df$survived <- as.factor(df$survived)
