@@ -25,6 +25,7 @@ test = model.matrix(~. , test)
 test = predict(preproc, test)
 
 fitControl <- trainControl(method="cv", number=5)
+# Despite the variable name, this is actually a RandomForest
 svmFit <- train(ytrain, xtrain,
                 method = "rf", tuneLength = 10, trControl = fitControl)
 svmFit
